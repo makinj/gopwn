@@ -7,47 +7,48 @@ import (
   "io"
 )
 
-type Remote struct {
+type RemoteObj struct {
   connection net.Conn
 }
 
-func remote(address string, port int) *Remote {
+func Remote(address string, port int) *RemoteObj {
   remoteAddressWithPort := address
   remoteAddressWithPort += ":"
   remoteAddressWithPort += strconv.Itoa(port)
-
-  fmt.Printf(remoteAddressWithPort)
 
   conn, err := net.Dial("tcp", remoteAddressWithPort)
   if err != nil{
     return nil
   }
 
-
-  return &Remote{
+  return &RemoteObj {
     connection: conn,
   }
 }
 
-func (r *Remote) send(s string) {
+func (r *RemoteObj) Send(s string) {
+  _, err := r.connection.Write([]byte(s))
 
+  if err != nil {
+    fmt.Println("write error:", err)
+  }
+
+  return
 }
 
 /*
  * reads n bytes from the connection in `r`
  */
 
-func (r *Remote) recv(n int) string {
+func (r *RemoteObj) Recv(n int) string {
   t := make([]byte, n)
-  bytesRead, err := r.connection.Read(t)
+  _, err := r.connection.Read(t)
 
   if err != nil {
     if err != io.EOF {
       fmt.Println("read error:", err)
     }
   }
-
-  fmt.Println("got ", bytesRead, " bytes")
 
   return string(t)
 }
